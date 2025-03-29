@@ -37,7 +37,7 @@ export default function RecipesPage() {
       setRecipe(data.recipe);
       toast.success('Recipe generated successfully!');
     } catch (error) {
-      toast.error('Failed to generate recipe. Please try again.');
+      toast.error('Failed to generate recipe. Please try again.',error);
     } finally {
       setLoading(false);
     }
