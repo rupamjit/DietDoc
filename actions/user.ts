@@ -8,13 +8,13 @@ export const checkUser = async () => {
   const user = await currentUser();
 
   if (!user) {
-    return { error: "User is not authenticated" }; // Handle unauthenticated users
+    return { error: "User is not authenticated" }; 
   }
 
-  // Check if the user already exists based on the clerkId
+
   const isExistingUser = await prisma?.user.findFirst({
     where: {
-      clerkId: user.id, // Ensure you're using clerkId to check user existence
+      clerkId: user.id,
     },
   });
 
