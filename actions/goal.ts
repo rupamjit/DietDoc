@@ -1,23 +1,24 @@
 "use server";
-
 import prisma from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 
+// Define your Category enum for type safety
 export enum Category {
   nutrition = "nutrition",
   fitness = "fitness",
   health = "health",
 }
 
+// Add a new goal
 export const addGoalAction = async (goalData: {
   title: string;
   target: number;
   unit: string;
   category: Category;
 }) => {
-  const { userId } = await auth();
+  const { userId } = await auth(); // Get the authenticated user's ID
 
-  if (!userId) throw new Error("User not authenticated");
+  if (!userId) throw new Error("User not authenticated"); // Ensure the user is authenticated
 
   try {
     const user = await prisma.user.findUnique({
@@ -26,6 +27,7 @@ export const addGoalAction = async (goalData: {
 
     if (!user) throw new Error("User not found");
 
+    // Create the new goal with userId and category
     const newGoal = await prisma.goal.create({
       data: {
         title: goalData.title,
@@ -42,7 +44,7 @@ export const addGoalAction = async (goalData: {
       target: newGoal.target,
       current: newGoal.current,
       unit: newGoal.unit,
-      category: newGoal.category,
+      category: newGoal.category as Category,
     };
   } catch (error) {
     console.error("Failed to add goal:", error);
@@ -50,10 +52,11 @@ export const addGoalAction = async (goalData: {
   }
 };
 
+// Fetch all goals
 export const fetchGoalsAction = async () => {
-  const { userId } = await auth();
+  const { userId } = await auth(); // Get the authenticated user's ID
 
-  if (!userId) throw new Error("User not authenticated");
+  if (!userId) throw new Error("User not authenticated"); // Ensure the user is authenticated
 
   try {
     const user = await prisma.user.findUnique({
@@ -63,7 +66,7 @@ export const fetchGoalsAction = async () => {
     if (!user) throw new Error("User not found");
 
     const goals = await prisma.goal.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id }, // Ensure goals belong to the authenticated user
       orderBy: { createdAt: "desc" },
     });
 
@@ -81,10 +84,11 @@ export const fetchGoalsAction = async () => {
   }
 };
 
+// Update a goal's progress
 export const updateGoalAction = async (goalId: string, current: number) => {
-  const { userId } = await auth();
+  const { userId } = await auth(); // Get the authenticated user's ID
 
-  if (!userId) throw new Error("User not authenticated");
+  if (!userId) throw new Error("User not authenticated"); // Ensure the user is authenticated
 
   try {
     const user = await prisma.user.findUnique({
@@ -116,10 +120,11 @@ export const updateGoalAction = async (goalId: string, current: number) => {
   }
 };
 
+// Delete a goal
 export const deleteGoalAction = async (goalId: string) => {
-  const { userId } = await auth();
+  const { userId } = await auth(); // Get the authenticated user's ID
 
-  if (!userId) throw new Error("User not authenticated");
+  if (!userId) throw new Error("User not authenticated"); // Ensure the user is authenticated
 
   try {
     const user = await prisma.user.findUnique({
