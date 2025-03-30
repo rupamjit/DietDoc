@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import Sidebar from "@/components/Sidebar";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,10 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    
     <html lang="en" className="dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ClerkProvider>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -40,6 +43,7 @@ export default function RootLayout({
             <main className="flex-1 overflow-y-auto">{children}</main>
           </div>
         </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

@@ -8,39 +8,24 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 model User {
-  id        String    @id @unique @default(uuid())
-  userId    String    @unique
-  email     String?   @unique
-  name      String?
-  goals     Goal[]    @relation("UserGoals")
-  recipes   Recipe[]  @relation("UserRecipes")
-  profile   Profile?  @relation
-}
-
-model Goal {
   id        String   @id @default(uuid())
-  title     String
-  target    Int
-  unit      String
-  deadline  DateTime
-  category  Category
-  userId    String
-  user      User     @relation(fields: [userId], references: [userId], name: "UserGoals")
+  email     String   @unique
+  clerkId   String   @unique
+  recipes   Recipe[] @relation("UserSavedRecipes")  
+  authoredRecipes Recipe[] @relation("UserAuthoredRecipes") 
+  goals     Goal[] @relation("UserGoals")
+  profile   Profile?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-enum Category {
-  NUTRITION
-  FITNESS
-  MENTAL_HEALTH
-  OTHER
-}
+
 
 model Recipe {
   id          String   @id @default(uuid())
@@ -51,10 +36,37 @@ model Recipe {
   cookingTime String
   complexity  String
   userId      String
-  user        User     @relation(fields: [userId], references: [userId], name: "UserRecipes")
+
+  userSavedBy User @relation(fields: [userId], references: [id], name: "UserSavedRecipes", map: "Recipe_userSavedBy_fkey")
+  userAuthor  User @relation(fields: [userId], references: [id], name: "UserAuthoredRecipes", map: "Recipe_userAuthor_fkey")
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+
+model Goal {
+  id        String   @id @default(uuid())
+  title     String
+  target    Int
+  unit      String
+  category  Category
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], name: "UserGoals", map: "Goal_userId_fkey")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  current   Int      @default(0)
+}
+
+
+
+enum Category {
+  nutrition
+  fitness
+  health
+}
+
+
 
 model Profile {
   id                 String   @id @default(uuid())
@@ -69,9 +81,3 @@ model Profile {
   dietaryPreferences String[]
   user               User     @relation(fields: [userId], references: [id])
 }
-
-
-
-
-
-

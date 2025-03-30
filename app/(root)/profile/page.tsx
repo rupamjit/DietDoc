@@ -1,11 +1,6 @@
 "use client";
-import { useState } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { useState, useEffect } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,14 +14,16 @@ import {
 } from "@/components/ui/select";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
+import { saveProfile } from "@/actions/profile"; // Correct the import path to your actions file
+
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState({
     name: "",
-    age: "",
-    weight: "",
-    height: "",
+    age: 0,
+    weight: 0,
+    height: 0,
     gender: "",
     allergies: [] as string[],
     chronicDiseases: [] as string[],
@@ -34,9 +31,9 @@ const Page = () => {
   });
 
   const [newAllergy, setNewAllergy] = useState("");
-  const [newDietaryPreference, setNewDietaryPreference] = useState("");
   const [customDisease, setCustomDisease] = useState(""); // For "Other" input
   const [showCustomDisease, setShowCustomDisease] = useState(false);
+  const [profileData, setProfileData] = useState(null);
 
   const chronicDiseasesList = [
     "Diabetes",
@@ -47,9 +44,26 @@ const Page = () => {
     "Other",
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+ 
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Profile saved!");
+    setLoading(true);
+
+    try {
+      // Call server action directly using the server function
+      const response = await saveProfile(profile);
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      toast.success("Profile saved successfully!");
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error(error.message || "Failed to save profile.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addItem = (key: keyof typeof profile, value: string) => {
@@ -85,6 +99,17 @@ const Page = () => {
       toast.success("Chronic disease added");
     }
   };
+
+
+//  useEffect(() => {
+//     const fetchProfile = async () => {
+//       await showProfile()
+//     };
+
+//       fetchProfile();
+//     },[])
+   
+
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -186,8 +211,26 @@ const Page = () => {
           </Button>
         </div>
       </form>
+
+      {/* Profile Display Card */}
+      <div className="mt-8">
+        <Card className="p-6 shadow-xl">
+          <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
+          <div className="space-y-2">
+            <div>Name: {profile.name}</div>
+            <div>Age: {profile.age}</div>
+            <div>Weight: {profile.weight} kg</div>
+            <div>Height: {profile.height} cm</div>
+            <div>Gender: {profile.gender}</div>
+            <div>Allergies: {profile.allergies.join(", ")}</div>
+            <div>Chronic Diseases: {profile.chronicDiseases.join(", ")}</div>
+            <div>Dietary Preferences: {profile.dietaryPreferences.join(", ")}</div>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };
 
 export default Page;
+

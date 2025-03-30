@@ -35,8 +35,8 @@ const Sidebar = () => {
     <div className="space-y-4 py-4 flex flex-col h-full bg-gradient-to-b from-blue-400 via-blue-600 to-blue-700 text-white">
       <div className="px-3 py-2 flex-1">
         <Link href="/" className="flex items-center pl-3 mb-14">
-          <Leaf className="h-8 w-8" />
-          <h1 className="text-4xl font-bold ml-2"><span className='text-blue-900'>Diet</span>Doc</h1>
+          {/* <Leaf className="h-8 w-8" /> */}
+          <h1 className="text-4xl font-bold ml-2"><span className='text-blue-900'>NutriFit</span>AI</h1>
         </Link>
         <div className="space-y-1">
           {routes.map((route) => (
