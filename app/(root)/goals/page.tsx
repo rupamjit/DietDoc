@@ -1,4 +1,6 @@
+
 "use client";
+
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios"; // Import axios for making HTTP requests
+import axios from "axios";
 
 interface Goal {
   id: string;
@@ -26,21 +28,23 @@ export default function GoalsPage() {
     unit: "",
     category: "nutrition" as const,
   });
+  const [loading, setLoading] = useState(false);
 
-  // Fetch goals on mount
   useEffect(() => {
     const loadGoals = async () => {
+      setLoading(true);
       try {
         const { data } = await axios.get("/api/goal");
         setGoals(data);
       } catch (error: any) {
         toast.error(error.message || "Error fetching goals");
+      } finally {
+        setLoading(false);
       }
     };
     loadGoals();
   }, []);
 
-  // Add a new goal
   const addGoal = async () => {
     if (!newGoal.title || newGoal.target <= 0 || !newGoal.unit) {
       toast.error("Please fill in all fields with valid values");
@@ -54,7 +58,6 @@ export default function GoalsPage() {
         unit: newGoal.unit,
         category: newGoal.category,
       });
-
       setGoals([...goals, data]);
       setNewGoal({ title: "", target: 0, unit: "", category: "nutrition" });
       toast.success("Goal added successfully");
@@ -63,7 +66,6 @@ export default function GoalsPage() {
     }
   };
 
-  // Update goal progress
   const updateProgress = async (goalId: string, value: number) => {
     if (value < 0) {
       toast.error("Progress cannot be negative");
@@ -71,7 +73,7 @@ export default function GoalsPage() {
     }
 
     try {
-      const { data } = await axios.patch(`/api/goal/${goalId}`, { current: value });
+      const { data } = await axios.patch("/api/goal", { id: goalId, current: value });
       setGoals(goals.map((goal) => (goal.id === goalId ? { ...goal, current: data.current } : goal)));
       toast.success("Goal progress updated");
     } catch (error: any) {
@@ -79,10 +81,9 @@ export default function GoalsPage() {
     }
   };
 
-  // Delete a goal
   const deleteGoal = async (goalId: string) => {
     try {
-      await axios.delete(`/api/goal/${goalId}`);
+      await axios.delete("/api/goal", { data: { id: goalId } });
       setGoals(goals.filter((goal) => goal.id !== goalId));
       toast.success("Goal deleted");
     } catch (error: any) {
@@ -90,9 +91,8 @@ export default function GoalsPage() {
     }
   };
 
-  // Calculate progress percentage
   const calculateProgress = (current: number, target: number) => {
-    return Math.min((current / target) * 100, 100); // Cap at 100%
+    return Math.min((current / target) * 100, 100);
   };
 
   return (
@@ -111,7 +111,6 @@ export default function GoalsPage() {
               placeholder="e.g., Daily Water Intake"
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="target">Target Amount</Label>
             <Input
@@ -123,7 +122,6 @@ export default function GoalsPage() {
               min="0"
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="unit">Unit</Label>
             <Input
@@ -133,7 +131,6 @@ export default function GoalsPage() {
               placeholder="e.g., glasses, steps, hours"
             />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
             <select
@@ -152,7 +149,6 @@ export default function GoalsPage() {
               <option value="health">General Health</option>
             </select>
           </div>
-
           <div className="md:col-span-2">
             <Button onClick={addGoal} className="w-full bg-[#2E8B57] hover:bg-[#236B43]">
               <Plus className="mr-2 h-4 w-4" /> Add Goal
@@ -161,41 +157,44 @@ export default function GoalsPage() {
         </div>
       </Card>
 
-      <div className="space-y-4">
-        {goals.map((goal) => (
-          <Card key={goal.id} className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-lg font-semibold">{goal.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  Target: {goal.target} {goal.unit} ({goal.category})
-                </p>
+      {loading ? (
+        <div className="text-center">Loading goals...</div>
+      ) : (
+        <div className="space-y-4">
+          {goals.map((goal) => (
+            <Card key={goal.id} className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold">{goal.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Target: {goal.target} {goal.unit} ({goal.category})
+                  </p>
+                </div>
+                <Button variant="destructive" size="icon" onClick={() => deleteGoal(goal.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-              <Button variant="destructive" size="icon" onClick={() => deleteGoal(goal.id)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>
-                  Progress: {goal.current} / {goal.target} {goal.unit}
-                </span>
-                <span>{Math.round(calculateProgress(goal.current, goal.target))}%</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>
+                    Progress: {goal.current} / {goal.target} {goal.unit}
+                  </span>
+                  <span>{Math.round(calculateProgress(goal.current, goal.target))}%</span>
+                </div>
+                <Progress value={calculateProgress(goal.current, goal.target)} />
+                <Input
+                  type="number"
+                  value={goal.current || ""}
+                  onChange={(e) => updateProgress(goal.id, Number(e.target.value))}
+                  className="mt-2"
+                  placeholder="Update progress"
+                  min="0"
+                />
               </div>
-              <Progress value={calculateProgress(goal.current, goal.target)} />
-              <Input
-                type="number"
-                value={goal.current || ""}
-                onChange={(e) => updateProgress(goal.id, Number(e.target.value))}
-                className="mt-2"
-                placeholder="Update progress"
-                min="0"
-              />
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
