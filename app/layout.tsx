@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "next-themes";
-import Sidebar from "@/components/Sidebar";
 import { ClerkProvider } from "@clerk/nextjs";
+import Header from "@/components/landingpage/Header";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,24 +27,16 @@ export default function RootLayout({
 }>) {
   return (
     
-    <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ClerkProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+   <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <div className="flex h-screen">
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto">{children}</main>
-          </div>
-        </ThemeProvider>
-        </ClerkProvider>
-      </body>
-    </html>
+          {/* Landing page */}
+          <Header />
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
