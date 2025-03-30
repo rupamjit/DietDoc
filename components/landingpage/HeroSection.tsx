@@ -17,9 +17,7 @@ const Hero = () => {
         <p className="text-lg md:text-xl text-gray-200 mb-6">
           Discover the best way to maintain a healthy lifestyle with our expert guidance.
         </p>
-        <button className="px-6 py-3 bg-yellow-400 text-black font-semibold rounded-lg shadow-lg hover:bg-yellow-500 transition duration-300">
-          Get Started
-        </button>
+  
       </div>
     </div>
   );

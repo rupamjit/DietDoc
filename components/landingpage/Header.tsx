@@ -61,7 +61,7 @@ const Header: React.FC = () => {
           </Link>
 
         <SignedOut>
-          <SignInButton forceRedirectUrl="/dashboard">
+          <SignInButton forceRedirectUrl="/profile">
             <Button className="cursor-pointer text-sm sm:text-base px-3 sm:px-4 py-2">
               Login
             </Button>
