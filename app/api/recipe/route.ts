@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PrismaClient } from "@prisma/client";
+
 import { auth } from "@clerk/nextjs/server";
+import prisma from "@/lib/db";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
-const prisma = new PrismaClient();
+
 
 if (process.env.NODE_ENV === "production") {
   prisma.$connect();
